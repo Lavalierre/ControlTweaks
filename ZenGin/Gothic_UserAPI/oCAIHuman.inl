@@ -4,4 +4,3 @@
 // Add your methods here
 
 zBOOL PC_SpecialMove_mod(zBOOL pressed);
-void PC_Turnings_mod(zBOOL forceRotation);

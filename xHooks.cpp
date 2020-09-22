@@ -2,17 +2,9 @@
 // Union SOURCE file
 
 namespace GOTHIC_ENGINE {
-	
-	template <class T>
-	inline void zClamp(T& x, const T min, const T max) {
-		if (x < min) x = min; else
-			if (x > max) x = max;
-	}
-
 
 
 	HOOK Ivk_oCAIHuman_PC_SpecialMove		AS		(&oCAIHuman::PC_SpecialMove, &oCAIHuman::PC_SpecialMove_mod);
-	HOOK Ivk_oCAIHuman_PC_Turnings			AS		(&oCAIHuman::PC_Turnings, &oCAIHuman::PC_Turnings_mod);
 
 	HOOK Ivk_oCAniCtrl_JumpForward			AS		(&oCAniCtrl_Human::JumpForward, &oCAniCtrl_Human::JumpForward_mod);
 
@@ -53,63 +45,6 @@ namespace GOTHIC_ENGINE {
 
 		return FALSE;
 	}
-
-	void oCAIHuman::PC_Turnings_mod(zBOOL forceRotation)
-	{
-		static zBOOL mouseScaleInitialized = FALSE;
-		static zREAL globalMouseScale = 2.0f;
-
-		const zREAL MOUSECLAMP = 50.0f;
-		const zREAL MOUSESCALE = 10.0f;
-
-		if (ztimer->frameTimeFloat == 0.0F) return;
-
-		if (!mouseScaleInitialized)
-		{
-			mouseScaleInitialized = TRUE;
-			globalMouseScale = zoptions->ReadReal("ENGINE", "zMouseRotationScale", globalMouseScale);
-		}
-
-		npc->AvoidShrink(1000);
-
-		//changed [dennis]
-		if (!Pressed(GAME_ACTION) || forceRotation)
-		{
-			zREAL xPos, yPos, zPos;
-			zinput->GetMousePos(xPos, yPos, zPos);
-			xPos *= globalMouseScale;
-
-			if (npc->GetWeaponMode() == NPC_WEAPON_NONE)
-			{
-				zClamp(xPos, -MOUSECLAMP, +MOUSECLAMP);
-
-				if (Pressed(GAME_LEFT))		PC_Turn(-1, TRUE);					else
-				if (Pressed(GAME_RIGHT))	PC_Turn(+1, TRUE);					else
-				if (xPos < 0)				PC_Turn((xPos / MOUSECLAMP) * MOUSESCALE, -xPos > MOUSECLAMP / MOUSESCALE);	else
-				if (xPos > 0)				PC_Turn((xPos / MOUSECLAMP) * MOUSESCALE, xPos > MOUSECLAMP / MOUSESCALE);
-				else
-				{
-					StopTurnAnis();
-				}
-			}
-			else
-			{
-				zClamp(xPos, -MOUSECLAMP, +MOUSECLAMP);
-
-				if (Pressed(GAME_LEFT))		PC_Turn(-2, TRUE);		else
-				if (Pressed(GAME_RIGHT))	PC_Turn(+2, TRUE);		else
-				if (xPos < 0)				PC_Turn((xPos / MOUSECLAMP) * MOUSESCALE, -xPos > MOUSECLAMP / MOUSESCALE);	else
-				if (xPos > 0)				PC_Turn((xPos / MOUSECLAMP) * MOUSESCALE, xPos > MOUSECLAMP / MOUSESCALE);
-				else
-				{
-					StopTurnAnis();
-				}
-			}
-		}
-		else StopTurnAnis();
-	}
-
-
 
 
 

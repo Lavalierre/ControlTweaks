@@ -3,3 +3,4 @@
 // User API for oCNpcInventory
 // Add your methods here
 
+zBOOL HandleEvent_mod(int key);

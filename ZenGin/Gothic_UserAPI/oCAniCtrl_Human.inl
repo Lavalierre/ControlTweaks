@@ -3,3 +3,4 @@
 // User API for oCAniCtrl_Human
 // Add your methods here
 
+int JumpForward_mod();

@@ -3,3 +3,4 @@
 // User API for oCItemContainer
 // Add your methods here
 
+zBOOL HandleEvent_mod(int key);

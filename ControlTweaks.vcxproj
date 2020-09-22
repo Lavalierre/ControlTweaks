@@ -492,6 +492,10 @@
     <ClInclude Include="Headers.h" />
     <ClInclude Include="Sources.h" />
     <ClInclude Include="UnionAfx.h" />
+    <ClInclude Include="xHooks.cpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="ZenGin\Gothic_II_Addon\API\oAiHuman.h" />
     <ClInclude Include="ZenGin\Gothic_II_Addon\API\oAiShoot.h" />
     <ClInclude Include="ZenGin\Gothic_II_Addon\API\oAniCtrl.h" />

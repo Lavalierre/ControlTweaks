@@ -3,3 +3,4 @@
 // User API for oCStealContainer
 // Add your methods here
 
+zBOOL HandleEvent_mod(int key);

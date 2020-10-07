@@ -4,3 +4,4 @@
 // Add your methods here
 
 int JumpForward_mod();
+void PC_JumpForward_mod();

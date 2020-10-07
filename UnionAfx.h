@@ -18,8 +18,6 @@ extern "C" {
   #include <time.h>
 }
 
-
-
 #pragma comment (lib, "Psapi.lib")
 #pragma comment (lib, "Shw32.lib")
 #pragma comment (lib, "Vdfs32g.lib")

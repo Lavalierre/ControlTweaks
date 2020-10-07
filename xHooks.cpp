@@ -3,6 +3,14 @@
 
 namespace GOTHIC_ENGINE {
 
+	zBOOL CapsLock(void)
+	{
+		BYTE keyState[256];
+
+		GetKeyboardState((LPBYTE)&keyState);
+		if (keyState[VK_CAPITAL] & 1) return TRUE;
+		return FALSE;
+	}
 
 	HOOK Ivk_oCAIHuman_PC_SpecialMove		AS		(&oCAIHuman::PC_SpecialMove, &oCAIHuman::PC_SpecialMove_mod);
 	HOOK Ivk_oCAIHuman_PC_Strafe			AS		(&oCAIHuman::PC_Strafe, &oCAIHuman::PC_Strafe_mod);
@@ -10,14 +18,16 @@ namespace GOTHIC_ENGINE {
 
 	HOOK Ivk_zCAICamera_CheckKeys			AS		(&zCAICamera::CheckKeys, &zCAICamera::CheckKeys_mod);
 
+	HOOK Ivk_oCNpc_EVStrafe					AS		(&oCNpc::EV_Strafe, &oCNpc::EV_Strafe_mod);
+
 	HOOK Ivk_oCAniCtrl_JumpForward			AS		(&oCAniCtrl_Human::JumpForward, &oCAniCtrl_Human::JumpForward_mod);
+	HOOK Ivk_oCAniCtrl_PCJumpForward		AS		(&oCAniCtrl_Human::PC_JumpForward, &oCAniCtrl_Human::PC_JumpForward_mod);
 
 	HOOK Ivk_oCNpcInventory_HandleEvent		AS		(&oCNpcInventory::HandleEvent, &oCNpcInventory::HandleEvent_mod);
 	HOOK Ivk_oCNpcContainer_HandleEvent		AS		(&oCNpcContainer::HandleEvent, &oCNpcContainer::HandleEvent_mod);
 	HOOK Ivk_oCStealContainer_HandleEvent	AS		(&oCStealContainer::HandleEvent, &oCStealContainer::HandleEvent_mod);
 	HOOK Ivk_oCItemContainer_HandleEvent	AS		(&oCItemContainer::HandleEvent, &oCItemContainer::HandleEvent_mod);
 	HOOK Ivk_oCViewTrade_HandleEvent		AS		(&oCViewDialogTrade::HandleEvent, &oCViewDialogTrade::HandleEvent_mod);
-
 
 
 	zBOOL oCAIHuman::PC_SpecialMove_mod(zBOOL pressed)
@@ -52,6 +62,7 @@ namespace GOTHIC_ENGINE {
 
 	zBOOL oCAIHuman::PC_Strafe_mod(zBOOL pressed)
 	{
+
 		zBOOL result = THISCALL(Ivk_oCAIHuman_PC_Strafe)(pressed);
 
 		if (result == FALSE)
@@ -126,16 +137,50 @@ namespace GOTHIC_ENGINE {
 
 
 
-
-
 	void zCAICamera::CheckKeys_mod()
 	{
-		if (player && (player->inventory2.IsOpen() || player->GetInteractMob()))
+		static zREAL prevCamDistOffset = camDistOffset;
+		THISCALL(Ivk_zCAICamera_CheckKeys)();
+		camDistOffset = prevCamDistOffset;
+	}
+
+
+
+	zBOOL oCNpc::EV_Strafe_mod(oCMsgMovement* csg)
+	{
+
+		if (!csg->IsInUse())
+			THISCALL(Ivk_oCNpc_EVStrafe)(csg);
+
+		zCModel* model = GetModel();
+
+		if (model->IsAniActive(model->GetAniFromAniID(csg->ani)))
 		{
-			return;
+			int strafeDirNow = 1;
+			if (model->GetAniFromAniID(csg->ani)->GetAniName().Search("STRAFEL", 1U) >= 0) strafeDirNow = 0;
+
+			zVEC3 ray = GetRightVectorWorld() * 50;
+			if (strafeDirNow == 0)
+				ray = GetRightVectorWorld() * -50;
+
+			ray[VY] += sin(human_ai->config.zMV_MAX_GROUND_ANGLE_WALK) * 50;
+			zVEC3 rayOrg = human_ai->centerPos;
+
+			if (human_ai->world->TraceRayNearestHit(rayOrg, ray, human_ai->vob, zTRACERAY_STAT_POLY | zTRACERAY_VOB_IGNORE_NO_CD_DYN | zTRACERAY_POLY_NORMAL))
+			{
+				model->StartAni(anictrl->_s_walk, 0);
+			}
+
+			if (zCAICamera::GetCurrent()->IsModeActive(zSTRING("CAMMODDIALOG")))
+			{
+				model->StartAni(anictrl->_s_walk, 0);
+			}
 		}
 
-		THISCALL(Ivk_zCAICamera_CheckKeys)();
+		if (model->IsAniActive(model->GetAniFromAniID(csg->ani)) && csg->IsInUse())
+			THISCALL(Ivk_oCNpc_EVStrafe)(csg);
+
+		return (!model->IsAniActive(model->GetAniFromAniID(csg->ani)));
 	}
 
 
@@ -186,7 +231,18 @@ namespace GOTHIC_ENGINE {
 		return 0;
 	}
 
+	void oCAniCtrl_Human::PC_JumpForward_mod()
+	{
+		if (CapsLock())
+		{
+			CanJumpLedge();
 
+			if (!GetFoundLedge())
+				return;
+		}
+
+		THISCALL(Ivk_oCAniCtrl_PCJumpForward)();
+	}
 
 
 

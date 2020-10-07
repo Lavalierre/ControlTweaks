@@ -10,6 +10,7 @@ namespace GOTHIC_ENGINE {
   }
   
   void Game_Init() {
+      
   }
 
   void Game_Exit() {

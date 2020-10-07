@@ -3,3 +3,4 @@
 // User API for oCNpc
 // Add your methods here
 
+zBOOL EV_Strafe_mod(oCMsgMovement* csg);
